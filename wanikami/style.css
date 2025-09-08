@@ -1,0 +1,308 @@
+/* Reset and base styles */
+:root {
+    /* Basic & primary colors */
+  --primary-bg-color: #EAEAEA;
+  --primary-text-color: #333;
+  --primary-button-text-color: #555;
+  --primary-button-border-color: #BCBCBC;
+  --header-bg-color-start: #FCFCFC;
+  --header-bg-color-end: #F1F1F1;
+  --header-border-color: #D5D5D5;
+  --title-text-color: #F52BA7;
+  
+  /* Icon colors */
+  --icon-menu-color: #666;
+  --icon-search-color: #000;
+  
+  /* Lesson & review card colors */
+  --card-reviews-active-bg-color: #00AAFF;
+  --card-lessons-active-bg-color: #F0A;
+  --card-unactive-bg-color: #808080;
+  --card-text-color: #FFF;
+  --card-button-border-color: #FFF;
+  
+  /* Section colors */
+  --section-bg-color: #F4F4F4;
+  --section-content-bg-color: #FFF;
+  --section-text-color: #333;
+  --section-button-text-color: #555;
+  --section-button-border-color: #ABABAB;
+  
+  /* Level progress bar */
+  --progress-bar-bg-color: #E0E0E0;
+  --progress-bar-border-color: #C9C9C9;
+  --progress-bar-fg-color: #F100A1;
+  
+  /* Indivisual item colors */
+  --unactive-item-bg-color-start: #CCC;
+  --unactive-item-bg-color-end: #C0C0C0;
+  --unactive-item-border-color-end: #999;
+  
+  --radical-bg-color-start: #0AF;
+  --radical-bg-color-end: #0095E0;
+  --radical-border-color: #0076B2;
+  
+  --kanji-bg-color-start: #FE00A9;
+  --kanji-bg-color-end: #E00095;
+  --kanji-border-color: #B10076;
+  
+  --vocab-bg-color-start: #A900FE;
+  --vocab-bg-color-end: #9500E0;
+  --vocab-border-color: #7600B2;
+  
+  /* SRS mastery level card colors */
+  --srs-apprentice-bg-color: #F01A96;
+  --srs-guru-bg-color: #9230AB;
+  --srs-master-bg-color: #304ED1;
+  --srs-enlightened-bg-color: #188EDC;
+  --srs-burned-bg-color: #808080;
+  
+  /* Review screen colors */
+  --review-screen-input-border-color: #B7E0F4;
+  --review-screen-input-correct-bg-color: #8C0;
+  --review-screen-input-wrong-bg-color: #F03;
+  --review-screen-input-correct-tip-bg-color: #999;
+  --review-screen-button-bg-color: #F9F9F9;
+  --review-screen-item-upgrade-bg-color: #39AA0B;
+  --review-screen-reading-bg-color-start: #000;
+  --review-screen-reading-bg-color-end:  #3C3C3C;
+  --review-screen-reading-border-color: #555;
+  --review-screen-meaning-bg-color-start: #EEE;
+  --review-screen-meaning-bg-color-end: #C1C1C1;
+  --review-screen-meaning-border-color: #D5D5D5;
+  --review-screen-question-border-color: #C8C8C8;
+  
+  /* Font families */
+  --default-font-family: "Noto Sans", "Noto Sans JP", "Noto Sans SC", sans-serif;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--default-font-family);
+  -webkit-tap-highlight-color: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body {
+  min-height: 100vh;
+  color: var(--primary-text-color);
+}
+button {
+  background: transparent;
+  border: none;
+  color: var(--primary-button-text-color);
+  cursor: pointer;
+}
+b {
+    font-size: 2rem;
+    font-weight: 700;
+}
+.icon {
+    border: none;
+    fill: var(--primary-text-color);
+    stroke-color: var(--primary-text-color);
+}
+
+/* Header styles */
+.header {
+  height: 10vh;
+  width: 100%;
+  background: linear-gradient(to bottom, var(--header-bg-color-start), var(--header-bg-color-end));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--header-border-color);
+  padding: 0 1rem;
+}
+.header__title {
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: -1px;
+  color: var(--title-text-color);
+}
+.header__buttons {
+  margin-right: .5rem;
+  display: flex;
+  gap: 1rem;
+}
+.icon-search, .icon-menu {
+  width: 1rem;
+}
+.icon-search {
+    fill: var(--icon-search-color);
+}
+.icon-menu {
+    fill: var(--icon-menu-color);
+}
+
+/* Section styles */
+.main {
+    background-color: var(--primary-bg-color);
+    width: 100vw;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+section {
+    width: 90%;
+    height: 50vh;
+    margin-top: 1rem;
+    display: flex;
+    padding: 1rem;
+    background-color: var(--section-bg-color);
+    color: var(--section-text-color);
+    opacity: .95;
+    border-radius: .3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+section .content {
+    background-color: var(--section-content-bg-color);
+    color: var(--section-text-color);
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: .3rem;
+}
+.card-cover-img {
+    height: 27vw;;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.section-button, .card-button {
+    width: 100%;
+    height: 13%;
+    background: transparent;
+    border: 1px solid var(--section-button-border-color);
+    border-radius: .35rem;
+    color: var(--section-button-text-color);
+    font-size: 1.1rem;
+    position: relative;
+}
+.card-button {
+    width: 85%;
+    height: 12vw;
+    border-color: var(--card-button-border-color);
+    color: var(--card-text-color);
+}
+.section-button::after, .card-button::after {
+    content: "";
+    position: absolute;
+    left: -.35rem;
+    top: -.35rem;
+    width: calc(100% + .7rem);
+    height: calc(100% + .7rem);
+    border-radius: .5rem;
+    border: 2px solid var(--card-reviews-active-bg-color);
+    opacity: 0;
+    transition: all 1s ease;
+}
+.section-button:active::after, .card-button:active::after {
+    transition: all .3s ease;
+    opacity: 1;
+}
+
+/* Lessons and Reviews card styles */
+.section__lessons-and-reviews {
+    background: transparent;
+    height: auto;
+}
+.lessons-and-reviews-card {
+    background-color: var(--card-unactive-bg-color);
+    border-radius: .3rem;
+    color: var(--card-text-color);
+    height: 35vh;
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.lessons-card .card-cover-img {
+    background-image: url('/assets/lessons-cover.png');
+}
+.reviews-card {
+    margin-bottom: 0;
+    height: 33vh;
+}
+.reviews-card .card-cover-img {
+    background-image: url('/assets/reviews-cover.png');
+}
+.lessons-card.active {
+    background-color: var(--card-lessons-active-bg-color);
+    height: 55vh;
+}
+.reviews-card.active {
+    background-color: var(--card-reviews-active-bg-color);
+    height: 45vh;
+}
+.lessons-and-reviews-card .card-button {
+    display: none;
+}
+.lessons-and-reviews-card.active .card-button {
+    display: block;
+}
+.start-button, .start-button {
+    background-color: var(--card-text-color);
+}
+.lessons-card.active .start-button {
+    color: var(--card-lessons-active-bg-color);
+}
+.reviews-card.active .start-button {
+    color: var(--card-reviews-active-bg-color);
+}
+.lessons-and-reviews-card div {
+    width: 85%;
+}
+.lessons-count, .reviews-count {
+    margin-left: 1rem;
+    background: var(--card-text-color);
+    color: var(--card-unactive-bg-color);
+    padding: .2rem .7rem .1rem .7rem;
+    border-radius: 1rem;
+    font-weight: 700;
+}
+.lessons-card.active .lessons-count {
+    color: var(--card-lessons-active-bg-color);
+}
+.reviews-card.active .reviews-count {
+    color: var(--card-reviews-active-bg-color);
+}
+.icon-chevron-right {
+    width: .6rem;
+    fill: var(--card-unactive-bg-color);
+    position: relative;
+    top: .125rem;
+    left: .1rem;
+}
+.lessons-card.active .icon-chevron-right {
+    fill: var(--card-lessons-active-bg-color);
+}
+.reviews-card.active .icon-chevron-right {
+    fill: var(--card-reviews-active-bg-color);
+}
+
+/* Recent mistakes section styles */
+.section__recent-mistakes .title {
+    width: 100%;
+    font-size: 1.2rem;
+}
+.section__recent-mistakes .content {
+    min-height: 57%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+.section__recent-mistakes .content hr {
+    width: 105%;
+    opacity: .4;
+}

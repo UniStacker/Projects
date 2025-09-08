@@ -1,0 +1,265 @@
+/* Reset and base styles */
+:root {
+  --primary-bg-color: #F8F5EC;
+  --header-bg-color: #fffdd4;
+  --header-border-color: #f87979;
+  --border-brown: #dcb323;
+  --text-color: #333;
+  --btn-bg-active: #b23418;
+  --btn-bg: #e7ce93;
+  --btn-text-color-active: #ffffff;
+  --xp-bar-fill: #b23418;
+  --xp-bar-bg: #e7ce93;
+  --drawn-border-color: #876b46;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--primary-bg-color);
+  background-image: url('assets/paper-background.svg');
+  min-height: 100vh;
+  font-family: sans-serif;
+  color: var(--text-color);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Header styles */
+.header {
+  max-height: 10vh;
+  width: 100%;
+  background: var(--header-bg-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 0.5em double var(--header-border-color);
+  padding: 0 1em;
+}
+
+.header__title {
+  font-size: 2em;
+  height: 2.5em;
+}
+
+.header__title img {
+  width: 4.5em;
+  position: relative;
+  bottom: 30%;
+}
+
+.header__nav {
+  margin-right: .5em;
+  display: flex;
+  gap: 1em;
+}
+
+.header__button {
+  color: var(--text-color); /* Ensure icons inherit color */
+}
+
+.header__icon {
+  width: 24px; /* Consistent desktop size */
+  height: 24px;
+  display: block;
+}
+
+/* Hamburger Animation */
+.header__menu-toggle {
+  display: none;
+}
+
+.header__icon rect {
+  transition: all 0.3s ease-in-out;
+  transform-origin: center;
+}
+
+.header__menu-toggle:checked + .header__button .header__icon #top {
+    transform: rotate(45deg) translateY(5px);
+}
+
+.header__menu-toggle:checked + .header__button .header__icon #middle {
+    transform: scale(0);
+    opacity: 0;
+}
+
+.header__menu-toggle:checked + .header__button .header__icon #bottom {
+    transform: rotate(-45deg) translate(1px, -7px);
+}
+
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .header {
+    height: 4em;
+    padding: 0 0.5em;
+  }
+
+  .header__title {
+    font-size: 1.5em;
+  }
+
+  .header__button {
+    font-size: 1.2em;
+  }
+
+  .header__icon {
+    width: 20px; /* Consistent mobile size */
+    height: 20px;
+  }
+}
+
+/* Main styles */
+.main {
+    height: 90vh;
+    padding: 1.5em 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.drawn-border {
+  border: none;
+  box-shadow: inset 0 0 0 .25em var(--drawn-border-color), 
+              0 0 5px rgba(0,0,0,0.2);
+  filter: blur(0.25px) contrast(1.1) opacity(.8);
+}
+
+.main__hero {
+    width: 85%;
+    height: 50%;
+    background: url('assets/card-bg-paper.svg');
+    border-radius: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    text-align: left;
+    padding: 1em;
+}
+
+/* Progress level info style */
+.hero__progress {
+    width: 95%;
+    height: 40%;
+    display: flex;
+    justify-content: space-around;
+    align-content: center;
+    padding: 0 1em;
+}
+
+.progress__level {
+    width: 20%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+}
+
+.level__heading {
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.level__number {
+    width: 3em;
+    height: 3em;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress__xp {
+    width: 60%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.xp__heading {
+    font-weight: 700;
+    font-size: 1.5em;
+    color: var(--text-color);
+}
+
+.xp__bar {
+    width: 70%;
+    height: 1.5em;
+    background: var(--xp-bar-bg);
+    border-radius: .4em;
+    overflow: hidden;
+}
+
+.xp__bar-fill {
+    height: 100%;
+    background: var(--xp-bar-fill);
+    border-radius: .4em;
+}
+
+/* Progress text info style */
+.hero__text-info {
+    height: 25%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    padding: 0 1em;
+}
+
+.text-info__greeting {
+    font-weight: 400;
+    font-size: 1.2em;
+}
+
+.text-info__learning {
+    font-size: .9em;
+    opacity: .8;
+}
+
+/* Progress session start buttons styles */
+.hero__session-btns {
+    height: 15%;
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.session-btn {
+    width: 45%;
+    height: 90%;
+    border-radius: .3em;
+    transition: .1s ease-in;
+    color: var(--text-color);
+    background: var(--btn-bg);
+}
+
+.session-btn:hover {
+    filter: brightness(1.1);
+}
+
+.session-btn:active {
+    transition: 25ms ease;
+    background: var(--btn-bg-active);
+    color: var(--btn-text-color-active);
+    transform: translateY(-.15em);
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WaniKami</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+JP&family=Noto+Sans+SC&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+      <symbol id="icon__arrow-left" viewbox="0 0 448 512">
+        <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"></path>
+      </symbol>
+      <symbol id="icon__arrow-right" viewbox="0 0 448 512">
+        <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"></path>
+      </symbol>
+      <symbol id="icon__chevron-left" viewbox="0 0 320 512">
+        <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z"></path>
+      </symbol>
+      <symbol id="icon__chevron-right" viewbox="0 0 320 512">
+        <path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"></path>
+      </symbol>
+      <symbol id="icon__search" viewbox="0 0 512 512">
+        <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"></path>
+      </symbol>
+      <symbol id="icon__menu" viewbox="0 0 512 512">
+          <g class="menu-icon__lines">
+            <rect id="top" x="0" y="0" width="100%" height="102" rx="50" ry="50" />
+            <rect id="middle" x="0" y="205" width="100%" height="102" rx="50" ry="50" />
+            <rect id="bottom" x="0" y="410" width="100%" height="102" rx="50" ry="50" />
+          </g>
+      </symbol>
+    </svg>
+    <header class="header">
+      <p class="header__title">WANI KAMI</p>
+      <div class="header__buttons">
+        <button class="search-button" type="button">
+          <svg class="icon icon-search" viewbox="0 0 512 512">
+            <use href="#icon__search"></use>
+          </svg>
+        </button>
+        <button class="menu-button">
+          <svg class="icon icon-menu" viewbox="0 0 512 512">
+              <use href="#icon__menu"></use>
+          </svg>
+        </div>
+      </div>
+    </header>
+    <main class="main">
+      <section class="section__lessons-and-reviews">
+        <div class="lessons-and-reviews-card lessons-card">
+          <div class="lessons-cover-img card-cover-img"></div>
+          <div class="lessons-count-msg">
+            Today's<br><b>Lessons</b> 
+            <span class="lessons-count">0</span>
+          </div>
+          <div class="lessons-msg">No more lessons for today.</div>
+          <button class="lessons-start-button card-button start-button">
+            Start Lessons
+            <svg class="icon icon-chevron-right" viewbox="0 0 320 512">
+              <use href="#icon__chevron-right"></use>
+            </svg>
+          </button>
+          <button class="advanced-options-button card-button">Advanced</button>
+        </div>
+        <div class="lessons-and-reviews-card reviews-card">
+          <div class="reviews-cover-img card-cover-img"></div>
+          <div class="reviews-count-msg">
+            <b>Reviews</b> <span class="reviews-count">0</span>
+          </div>
+          <div class="reviews-msg">There are no more reviews to do right now.</div>
+          <button class="reviews-start-button card-button start-button">
+            Start Reviews
+            <svg class="icon icon-chevron-right" viewbox="0 0 320 512">
+              <use href="#icon__chevron-right"></use>
+            </svg>
+          </button>
+        </div>
+      </section>
+      <section class="section__recent-mistakes">
+        <div class="title">Recent Mistakes</div>
+        <div class="content">
+          <div class="mistakes-msg">
+            At this moment, emptiness prevails. When you do your Reviews, all of your mistakes will appear here, for a single day, in this space of reflection.
+          </div>
+          <hr>
+          <div class="subjects">Water</div>
+        </div>
+        <button class="quiz-button section-button">Quiz</button>
+        <button class="redo-lessons-button section-button">Redo Lessons</button>
+      </section>
+    </main>
+    <script src="script.js" type="text/javascript" charset="utf-8"></script>
+  </body>
+</html>

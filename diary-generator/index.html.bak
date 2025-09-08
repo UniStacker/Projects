@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework Diary</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #000;
+    }
+
+    .header {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      position: relative;
+    }
+
+    .header img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 60px;
+    }
+
+    .title {
+      text-align: center;
+    }
+
+    .title h1 {
+      font-size: 1rem;
+      margin: 0;
+      font-weight: bold;
+    }
+    .title h2 {
+      font-size: 0.9rem;
+      margin: 2px 0 0 0;
+    }
+
+    .meta {
+      margin: 5px 0 15px 0;
+      text-align: center;
+      font-size: 0.9rem;
+      width: 95%;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    #class, #date {
+      font-size: 0.8rem;
+      border-bottom: 1px solid black;
+    }
+
+    .diary-container {
+      width: 100%;
+      max-width: 800px;
+      border: 5px solid #ffd500;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.65rem;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: center;
+    }
+    
+    td ~ td {
+        width: 100%;
+    }
+
+    th {
+      font-weight: 800;
+      background: #f9f9f9;
+    }
+
+    .scaffold {
+      position: absolute;
+      bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="college-logo.png" alt=" ">
+    <div id="header__text">
+      <div class="title">
+        <h1><u>DHA SENIOR SCHOOL & COLLEGE</u></h1>
+        <h2><u>HOME WORK DIARY</u></h2>
+      </div>
+      <div class="meta">
+        <div>
+          Class/Sec: <span id="class"></span>
+        </div>
+        <div>
+          Date: <span id="date"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="diary-container">
+    <table>
+      <thead>
+        <tr>
+          <th>SUBJECTS</th>
+          <th>CLASSWORK</th>
+          <th>HOMEWORK</th>
+          <th>TEACHER</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Urdu</td><td></td><td></td><td></td></tr>
+        <tr><td>English</td><td></td><td></td><td></td></tr>
+        <tr><td>Physics</td><td></td><td></td><td></td></tr>
+        <tr><td>Tafseer-ul-Quran</td><td></td><td></td><td></td></tr>
+        <tr><td>Pak. St</td><td></td><td></td><td></td></tr>
+        <tr><td>Maths</td><td></td><td></td><td></td></tr>
+        <tr><td>Computer</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="scaffold">
+    <p>📂 Upload Diary JSON/CSV (auto-table)</p>
+    <input type="file" id="fileUpload" accept=".json,application/json,.csv,text/csv">
+    <br>
+    <button onclick="loadDiary()">Load</button>
+  </div>
+
+  <script>
+    function loadDiary() {
+      const fileInput = document.getElementById('fileUpload');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select a JSON/CSV file first.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          let data;
+          const ext = file.name.split('.').pop().toLowerCase();
+          if (file.type === "application/json" || ext === "json") {
+            data = JSON.parse(e.target.result);
+          } else if (file.type === "text/csv" || ext === "csv") {
+            data = csvToJson(e.target.result);
+          }
+          updateTable(data);
+        } catch (err) {
+          alert("Error parsing file: " + err);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function csvToJson(csv) {
+      const lines = csv.split(/\r?\n/).filter(Boolean);
+
+      // Remove header if it starts with "subject"
+      let startIndex = 0;
+      const headers = parseCsvLine(lines[0]);
+      if (headers[0].trim().toLowerCase() === "subject") {
+        startIndex = 1;
+      }
+
+      let obj = {};
+      for (let i = startIndex; i < lines.length; i++) {
+        const values = parseCsvLine(lines[i]);
+        if (!values[0]) continue;
+        if (values[0]?.trim() == "Stats") values[0] = "Statistics";
+        if (values[0]?.trim() == "Math") values[0] = "Maths";
+        if (values[0]?.trim().toLowerCase().includes("quran"))
+          values[0] = "Tafseer-ul-Quran";
+        obj[values[0].trim()] = {
+          classwork: values[1]?.trim() || "",
+          homework: values[2]?.trim() || ""
+        };
+      }
+
+      return obj;
+    }
+
+    // parses one CSV line safely, respecting quotes
+    function parseCsvLine(line) {
+      const result = [];
+      let current = "";
+      let insideQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"' && line[i + 1] === '"') {
+          // escaped double-quote
+          current += '"';
+          i++;
+        } else if (char === '"') {
+          insideQuotes = !insideQuotes;
+        } else if (char === ',' && !insideQuotes) {
+          result.push(current);
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      result.push(current);
+
+      return result;
+    }
+
+    function teacherOf(subject) {
+      return {
+        Urdu: "Rasheed",
+        Computer: "Adnan",
+        "Pak. St": "Anas",
+        Statistics: "Shahzad",
+        Physics: "Zaheer Ali",
+        Maths: "Umair",
+        English: "Wajid",
+        "Tafseer-ul-Quran": "Ab. Rahman",
+        Chemistry: "Awais",
+        Biology: "Samina"
+      }[subject] || "---";
+    }
+
+    function getDate() {
+      let d = new Date();
+      let day = String(d.getDate()).padStart(2, "0");
+      let month = String(d.getMonth() + 1).padStart(2, "0");
+      let year = d.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+
+    function updateTable(data) {
+      const tbody = document.querySelector('table tbody');
+      tbody.innerHTML = ''; // Clear old rows
+      document.querySelector("#date").innerHTML = getDate();
+      document.querySelector("#class").innerHTML = "XII - B";
+
+      for (const subject in data) {
+        const row = document.createElement('tr');
+        const cw = data[subject].classwork || '---';
+        const hw = data[subject].homework || '---';
+
+        row.innerHTML = `
+          <td>${subject}</td>
+          <td>${cw}</td>
+          <td>${hw}</td>
+          <td>${teacherOf(subject)}</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+  </script>
+</html>

@@ -1,0 +1,298 @@
+/* Dark Bio-Organic Theme */
+
+:root {
+    --primary-color: #00ff99;
+    --background-color: #0d0d0d;
+    --cell-color: #39ff14;
+    --grid-background: #111;
+    --header-background: rgba(10, 10, 10, 0.8);
+    --button-background: rgba(0, 0, 0, 0.7);
+    --button-border-color: #00ffff;
+    --font-family: 'Orbitron', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    background-image: url('assets/background.svg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: var(--font-family);
+    color: var(--primary-color);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--header-background);
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 0 20px var(--primary-color);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px var(--primary-color);
+    margin: 0;
+}
+
+.menu {
+    display: flex;
+    gap: 1rem;
+}
+
+.menu button {
+    background: var(--button-background);
+    border: 2px solid var(--button-border-color);
+    border-radius: 50%;
+    padding: 0.5rem;
+    color: var(--button-border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu button img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.menu button:hover {
+    background: var(--button-border-color);
+    box-shadow: 0 0 15px var(--button-border-color);
+}
+
+.menu button:hover img {
+    transform: scale(1.1);
+}
+
+.menu button.active {
+    background: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+.grid-wrapper {
+    flex-grow: 1;
+    overflow: scroll;
+    background: var(--grid-background);
+    position: relative;
+}
+
+.grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+}
+
+.cell {
+    position: absolute;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #222;
+    border-radius: 3px;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.cell.alive {
+    background: var(--cell-color);
+    box-shadow: 0 0 8px var(--cell-color);
+    transform: scale(1.1);
+    border-radius: 50%;
+}
+
+/* Mobile First */
+@media (max-width: 768px) {
+    header {
+        padding: 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    .menu {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--header-background);
+        padding: 0.5rem;
+        border-radius: 30px;
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 0 15px var(--primary-color);
+        gap: 0.5rem;
+    }
+
+    .menu button {
+        width: 40px;
+        height: 40px;
+        padding: 0.3rem;
+    }
+}
+
+@media (min-width: 769px) {
+    body {
+        flex-direction: row;
+    }
+
+    header {
+        flex-direction: column;
+        width: 80px;
+        height: 100vh;
+        border-right: 2px solid var(--primary-color);
+        border-bottom: none;
+        padding: 1rem 0;
+        justify-content: flex-start;
+        gap: 2rem;
+    }
+
+    header h1 {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: rotate(180deg);
+        font-size: 1.8rem;
+    }
+
+    .menu {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+    animation: fadeIn 0.5s;
+}
+
+.modal-content {
+    background-color: var(--background-color);
+    margin: 15% auto;
+    padding: 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 0 20px var(--primary-color);
+}
+
+.patterns {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pattern-btn {
+    background: var(--button-background);
+    border: 2px solid var(--button-border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pattern-btn:hover {
+    background: var(--button-border-color);
+    box-shadow: 0 0 15px var(--button-border-color);
+}
+
+.pattern-btn img {
+    width: 50px;
+    height: 50px;
+}
+
+#closeModal {
+    background: var(--button-background);
+    border: 2px solid var(--button-border-color);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    color: var(--button-border-color);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#closeModal:hover {
+    background: var(--button-border-color);
+    color: var(--background-color);
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* Retro Overlay Effect */
+.retro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 101;
+}
+
+.retro-overlay::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.3),
+        rgba(0, 0, 0, 0.3) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    z-index: 102;
+}
+
+.retro-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%,rgba(0,0,0,0.8) 100%);
+    z-index: 103;
+}
+
+body {
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.95; }
+    100% { opacity: 1; }
+}

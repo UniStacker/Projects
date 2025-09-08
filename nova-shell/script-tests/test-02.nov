@@ -1,0 +1,2 @@
+echo "Hello World" > ~/.projects/nova-shell/hello.txt
+ls $HOME/.projects/nova-shell/

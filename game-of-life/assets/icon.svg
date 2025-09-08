@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00ff99" />
+            <stop offset="100%" stop-color="#00ffff" />
+        </linearGradient>
+    </defs>
+    <path d="M50,5 C75,5 95,25 95,50 C95,75 75,95 50,95 C25,95 5,75 5,50 C5,25 25,5 50,5 Z" fill="url(#grad)" />
+    <path d="M50,10 C72,10 90,28 90,50 C90,72 72,90 50,90 C28,90 10,72 10,50 C10,28 28,10 50,10 Z" fill="#0d0d0d" />
+    <path d="M50,15 C69,15 85,31 85,50 C85,69 69,85 50,85 C31,85 15,69 15,50 C15,31 31,15 50,15 Z" fill="url(#grad)" opacity="0.2" />
+    <text x="50" y="60" font-family="Orbitron, sans-serif" font-size="20" fill="#00ff99" text-anchor="middle">GOL</text>
+</svg>

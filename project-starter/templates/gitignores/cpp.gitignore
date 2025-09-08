@@ -1,0 +1,21 @@
+# Object and binary files
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.a
+
+# Build dirs
+build/
+bin/
+cmake-build-*/
+*.dSYM/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

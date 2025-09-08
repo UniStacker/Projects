@@ -1,0 +1,8 @@
+USER = "Shan"
+AGE = 17
+
+DAGE = AGE * 2 - 2
+
+echo "Double age is: $DAGE"
+
+ls -l -Ra  ~

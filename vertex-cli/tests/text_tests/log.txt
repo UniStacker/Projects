@@ -1,0 +1,49 @@
+Running: Context around 'random'
+$ vxc text extract sample.txt -contains 'random' -context 1
+Some random line.
+THE QUICK BROWN FOX
+Some random line.
+Another quick line.
+---
+Running: Count lines with 'random'
+$ vxc text extract sample.txt -contains 'random' -count
+1
+---
+Running: Count lines with 'quick'
+$ vxc text extract sample.txt -contains 'quick' -count
+3
+---
+Running: Numbered match lines for 'quick'
+$ vxc text extract sample.txt -contains 'quick' -number
+1: The quick brown fox
+5: Another quick line.
+6: quickly does it.
+---
+Running: Unique, ignore-case match for 'quick'
+$ vxc text extract sample.txt -match 'quick' -ignore-case -trim -unique
+The quick brown fox
+THE QUICK BROWN FOX
+Another quick line.
+quickly does it.
+---
+Running: Invert match 'quick'
+$ vxc text extract sample.txt -contains 'quick' -invert
+jumps over the lazy dog.
+THE QUICK BROWN FOX
+Some random line.
+Empty line follows:
+
+Last line.
+---
+[FAIL] Invert match 'quick'
+Expected: [jumps over the lazy dog.
+Some random line.
+Empty line follows:
+
+Last line.]
+Got:      [jumps over the lazy dog.
+THE QUICK BROWN FOX
+Some random line.
+Empty line follows:
+
+Last line.]

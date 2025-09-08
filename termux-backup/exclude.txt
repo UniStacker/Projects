@@ -1,0 +1,1 @@
+.bash_history .cache .cargo .lesshst .local .python_history .ssh .subversion .wget_hsts

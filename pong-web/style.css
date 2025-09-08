@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+#gameCanvas {
+  background: #000;
+  display: block;
+}
+
+#joystick {
+  position: fixed;
+  width: 15em;
+  height: 15em;
+  left: 5em;
+  bottom: 5em;
+  background: rgba(50, 200, 250, 0.1);
+  border-radius: 50%;
+}
+
+#stick {
+  position: absolute;
+  width: 4em;
+  height: 4em;
+  left: calc(50% - 0.75em);
+  top: calc(50% - 0.75em);
+  background: rgba(100, 250, 250, 0.5);
+  border-radius: 50%;
+  transition: left 0.05s, top 0.05s;
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game of Life – Bio-Organic</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/icon.svg">
+</head>
+<body>
+    <header>
+        <h1>Game of Life</h1>
+        <div class="menu">
+            <button id="start"><img src="assets/start.svg" alt="Start"></button>
+            <button id="random"><img src="assets/random.svg" alt="Random"></button>
+            <button id="clear"><img src="assets/clear.svg" alt="Clear"></button>
+            <button id="speed"><img src="assets/speed-vein.svg" alt="Speed"></button>
+            <button id="dna"><img src="assets/dna-toggle.svg" alt="DNA"></button>
+        </div>
+    </header>
+    <main class="grid-wrapper" id="gridWrapper">
+        <div class="grid" id="grid"></div>
+    </main>
+
+    <div id="dnaModal" class="modal">
+        <div class="modal-content">
+            <h2>Select a Pattern</h2>
+            <div class="patterns">
+                <button class="pattern-btn" data-pattern="glider"><img src="assets/glider.svg" alt="Glider"></button>
+                <button class="pattern-btn" data-pattern="lwss"><img src="assets/lwss.svg" alt="LWSS"></button>
+                <button class="pattern-btn" data-pattern="pulsar"><img src="assets/pulsar.svg" alt="Pulsar"></button>
+                <button class="pattern-btn" data-pattern="gosper"><img src="assets/gosper.svg" alt="Gosper Gun"></button>
+            </div>
+            <button id="closeModal">Close</button>
+        </div>
+    </div>
+
+    <audio id="ambient" loop>
+        <source src="assets/ambient.wav" type="audio/wav">
+    </audio>
+
+    <script src="script.js"></script>
+    <div class="retro-overlay"></div>
+</body>
+</html>
