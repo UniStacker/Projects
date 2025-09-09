@@ -258,8 +258,8 @@
 
       for (const subject in data) {
         const row = document.createElement('tr');
-        const cw = data[subject].classwork || '---';
-        const hw = data[subject].homework || (cw != '---') ? 'Review C.W' : '---';
+        const cw = data[subject].classwork || "---";
+        const hw = data[subject].homework || (cw == "---" ? "---" : "Review C.W");
 
         row.innerHTML = `
           <td>${subject}</td>

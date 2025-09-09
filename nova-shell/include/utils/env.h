@@ -1,13 +1,14 @@
 #pragma once
-#include <unordered_map>
 #include <string>
-#include <vector>
 #include <iostream>
 #include <cstring>   // for strdup
+#include "utils/types.h"
+#include "utils/path.h"
+#include "utils/string.h"
 
 class Env {
 private:
-  std::unordered_map<std::string, std::string> vars;
+  map_str vars {};
 
 public:
   // Construct from char** envp
@@ -27,4 +28,7 @@ public:
 
   // Export as char** for execve
   std::vector<char*> to_envp() const;
+
+  // Get the absolute path of a program from the paths stored in $PATH
+  std::string getFromPath(const std::string& program);
 };
