@@ -1,0 +1,31 @@
+.data
+no_name_err: .asciz "No name provided to mkdir."
+err_len: .word 26
+
+.text
+.global mkdir
+
+mkdir:
+    cbz x0, no_name
+    cbz x1, default_perms
+    back:
+    mov x8, #83
+    svc 0
+
+    b _end
+
+default_perms:
+    mov x1, #493
+    b back
+
+no_name:
+    ldr x0, =no_name_err
+    ldr x1, =err_len
+    ldr x1, [x1]
+    bl echo
+
+    mov x0, #1 // Return code
+    b _end
+
+_end:
+    ret

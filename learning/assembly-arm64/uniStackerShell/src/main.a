@@ -1,0 +1,59 @@
+.bss
+    .lcomm cmd_buff, 128
+    .lcomm len_buff, 8
+
+.data
+    cmd_buff_len: .word 127
+
+    prompt: .asciz "$ "
+    prompt_len: .word 2
+
+.text
+
+.extern strlen
+.extern print_integer
+.global _start
+
+_start:
+    nop
+
+command_loop:
+    // 1. Show peompt
+    ldr x1, =prompt
+    ldr x2, =prompt_len
+    ldr w2, [x2]
+    bl print
+
+    // 2. Get command
+    ldr x1, =cmd_buff
+    ldr x2, =cmd_buff_len
+    ldr w2, [x2]
+    bl read
+    sub x0, x0, #1
+    strb wzr, [x1, x0]
+
+    // 3. Print command len
+    mov x0, x1
+    bl strlen
+    bl print_integer
+
+    // 4. Repeat
+    b command_loop
+
+print:
+    mov x0, #1
+    mov x8, #64
+    svc 0
+    ret
+
+read:
+    mov x0, #0
+    mov x8, #63
+    svc 0
+    ret
+
+_end:
+    mov x0, #0
+    mov x8, #93
+    svc 0
+

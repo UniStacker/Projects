@@ -1,0 +1,16 @@
+.text
+.extern strlen
+.global echo
+
+echo:
+    stp x1, x2, [sp, #-8]!
+
+    mov x1, x0
+    bl strlen
+    mov x2, x0
+    mov x0, #1
+    mov x8, #64
+    svc 0
+
+    ldp x1, x2, [sp], #8
+    ret

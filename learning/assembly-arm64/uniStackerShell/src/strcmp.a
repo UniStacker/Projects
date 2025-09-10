@@ -1,0 +1,8 @@
+
+.text
+.global strcmp
+
+strcmp:
+    stp x29, x30, [sp, #-16]!
+
+    // Compare len

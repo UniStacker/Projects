@@ -1,0 +1,18 @@
+
+.text
+.global strlen
+
+strlen:
+    stp x1, x4, [sp, #-16]!
+    mov x1, #0
+
+loop:
+    ldrb w4, [x0, x1]
+    cbz w4, loop_done // If current byte is 0, jump
+    add x1, x1, #1
+    b loop
+
+loop_done:
+    mov x0, x1
+    ldp x1, x4, [sp], #16
+    ret
