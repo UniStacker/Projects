@@ -4,6 +4,7 @@
 #include "utils/env.h"
 #include "utils/path.h"
 #include <iostream>
+#include <algorithm>
 #include <regex>
 
-map_str parse(const vec_str &tokens, const Env &env);
+omap_str parse(const vec_tok &tokens, const Env &env);

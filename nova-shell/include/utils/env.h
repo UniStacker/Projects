@@ -8,7 +8,7 @@
 
 class Env {
 private:
-  map_str vars {};
+  umap_str vars {};
 
 public:
   // Construct from char** envp

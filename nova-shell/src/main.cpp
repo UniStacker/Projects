@@ -21,7 +21,7 @@ std::string parse_prompt(const std::string &prompt, const Env &env) {
       char next = (i + 1 < prompt.length()) ? prompt[++i] : '\0';
       if (next == 'u') out += env.get("USER"); else
       if (next == 'h') out += "Nova"; else
-      if (next == 'c') {
+      if (next == '~') {
         std::string cwd = env.get("PWD");
         std::string home = env.get("HOME");
         size_t pos = cwd.find(home);
@@ -49,18 +49,19 @@ int main(int argc, char *argv[], char *envp[]) {
   env.set("OLDPWD", env.get("HOME"));
   env.set("PWD", env.get("HOME"));
   chdir(env.get("PWD").c_str());
-  const std::string PS1 {"%u@%h %c $ "};
+  const std::string PS1 { "╭─\033[1m\033[32m%u@%h \033[34m%~\033[0m\n╰─$ " };
 
 
   if (argc > 2 && std::string(argv[1]) == "-c") {
     lex = Lexer::fromString(std::string(argv[2]));
     execute(lex, env);
   } else
-  if (argc == 2) {
-    lex = Lexer::fromFile(std::string(argv[1]));
+  if (argc == 2 && argv[1][0] != '-') {
+    std::string file(argv[1]);
+    lex = Lexer::fromFile(file);
     execute(lex, env);
-  } else
-  if (argc == 1) {
+  }
+  else {
     while (true) {
       std::cout << parse_prompt(PS1, env);
       std::string line;

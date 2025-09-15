@@ -43,27 +43,99 @@ int cmd_cd(const fs::path &path, Env &env) {
   return 2;
 }
 
+int cmd_pwd(Env& env) {
+  auto cwd = env.get("PWD") + '\n';
+  write(STDOUT_FILENO, cwd.c_str(), cwd.length());
+  return 0;
+}
+
 void cmd_exit() {
   exit(0);
 }
 
+int run_builtin(const std::string &cmd, const std::string &argv, Env &env) {
+  if (cmd == "cd")
+    return cmd_cd(argv, env);
+  else if (cmd == "pwd")
+    return cmd_pwd(env);
+  else if (cmd == "exit")
+    cmd_exit();
+
+  return -1;
+}
+
+int run_pipeline(const std::vector<std::vector<std::string>> &commands, Env &env) {
+  if (commands.empty()) return -1;
+
+  size_t n = commands.size();
+  std::vector<int> pipes(2 * (n - 1));
+
+  for (size_t i = 0; i < n - 1; ++i)
+    if (pipe(&pipes[i * 2]) == -1) { perror("pipe"); return 127; }
+
+  std::vector<pid_t> pids {};
+
+  for (size_t i = 0; i < n; ++i) {
+    auto command = commands[i][0];
+    auto args = commands[i][1];
+    auto name = fs::path(command).filename().string();
+    bool builtin = is_builtin(command);
+
+    if (DEBUG)
+      std::clog << "Running: " << command << " " << args << '\n';
+
+
+    // Special case: single builtin (no pipes)
+    if (builtin && n == 1)
+      return run_builtin(command, args, env);
+
+    pid_t pid = fork();
+    if (pid == 0) {
+      // --- CHILD ---
+
+      // Setup redirections
+      if (i > 0) dup2(pipes[(i - 1) * 2], STDIN_FILENO);
+      if (i < n - 1) dup2(pipes[i * 2 + 1], STDOUT_FILENO);
+      for (int fd : pipes) close(fd);
+
+      if (builtin)
+        return run_builtin(command, args, env);
+      else {
+        auto argv = make_argv(commands[i][0], commands[i][1]);
+        execve(argv[0], argv.data(), env.to_envp().data());
+        perror("execve");
+        return 127;
+      }
+    }
+    pids.push_back(pid);
+  }
+
+  for (int fd : pipes) close(fd);
+
+  int status;
+  for (pid_t pid : pids) {
+    if (waitpid(pid, &status, 0) < 0) {
+      perror("waitpid failed");
+      return -1;
+    }
+  }
+
+  if (WIFEXITED(status)) {
+    return WEXITSTATUS(status);  // last child exit code
+  } else {
+    return -1;
+  }
+}
+
 int run_command(const fs::path &command, 
                 const std::string &args, 
-                Env &env) 
+                Env &env)
 {
-  std::string cmd = command.filename().string();
+  std::string name = command.filename().string();
   if (DEBUG)
-    std::clog << "Running: " << command << " '" << args << "'\n";
+    std::clog << "Running: " << command << " " << args << '\n';
 
-  if (cmd == "cd")
-    return cmd_cd(args, env);
-  else if (cmd == "pwd") {
-    std::cout << env.get("PWD") << '\n';
-    return 0;
-  }
-  else if (cmd == "exit") {
-    cmd_exit();
-  }
+  if (is_builtin(command)) return run_builtin(command, args, env);
 
   pid_t pid = fork();
   if (pid < 0) {
@@ -72,17 +144,8 @@ int run_command(const fs::path &command,
   }
 
   if (pid == 0) {
-    // Child //
-    // Build argv
-    std::vector<char*> argv = make_argv(cmd, args);
-
-    // Build envp
-    std::vector<char*> envp = env.to_envp();
-
-    // Exec
-    execve(command.string().c_str(), argv.data(), envp.data());
-
-    // If execve returns, there was an error
+    // Child: exec command //
+    execve(command.string().c_str(), make_argv(name, args).data(), env.to_envp().data());
     perror("execve failed");
     _exit(1);
   }
@@ -101,26 +164,43 @@ int run_command(const fs::path &command,
   }
 }
 
+std::vector<vec_str> readyCommands(const omap_str& commands, Env& env) {
+  std::vector<vec_str> outCmds {};
+  outCmds.reserve(commands.size() + 1);
+
+  for (const auto &[cmd, args] : commands) {
+    fs::path path { cmd };
+    if (!fs::exists(path) && !is_builtin(path))
+      path = env.getFromPath(path);
+
+    if (!fs::exists(path) && !is_builtin(path) && cmd.substr(0, 15) != "nova_internal_") {
+      std::cerr << "No command " << path << " Found, Did you mean:\n";
+      return {};
+    } else outCmds.push_back({ path, args });
+  }
+
+  return outCmds;
+}
+
 void execute(Lexer &lex, Env &env) {
   while (!lex.eof()) {
-    auto tokens = lex.tokenize_line();
+    vec_tok tokens = lex.tokenize_line();
 
     if (tokens.empty()) continue;
-    if (DEBUG) for (auto& t : tokens) std::cout << "[" << t << "]\n";
+    if (DEBUG) for (auto& t : tokens) std::cout << t;
 
-    map_str ast = parse(tokens, env);
-    if (ast["type"] == "command") {
-      fs::path command = ast["cmd"];
-      if (!fs::exists(command) && !is_builtin(command)) {
-        // command = "/usr/bin/";
-        // if (!env.get("PREFIX").empty()) (command = env.get("PREFIX")) /= "bin";
-        // command /= ast["cmd"];
-        command = env.getFromPath(ast["cmd"]);
-      }
+    omap_str ast = parse(tokens, env);
 
-      if (!fs::exists(command) && !is_builtin(command)) {
-        std::cerr << "No command " << ast["cmd"] << " Found, Did you mean:" << '\n';
-      } else run_command(command, ast["args"], env);
+    auto type = ast["type"];
+    if (type == "command") {
+      auto commands { readyCommands(ast.slice(1, ast.size()), env) };
+      if (!commands.empty())
+        run_command(commands[0][0], commands[0][1], env);
+    }
+    else if (type == "pipe") {
+      auto commands = readyCommands(ast.slice(1, ast.size()), env);
+      if (!commands.empty())
+        run_pipeline(commands, env);
     }
   }
 }

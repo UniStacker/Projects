@@ -4,7 +4,8 @@
 #include "core/lexer.h"
 #include "core/parser.h"
 #include "utils/env.h"
+#include "utils/path.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 void execute(Lexer &lex, Env &env);
