@@ -67,7 +67,15 @@ int main(int argc, char *argv[], char *envp[]) {
       std::string line;
       std::getline(std::cin, line);
       lex = Lexer::fromString(line);
-      execute(lex, env);
+      auto astNode = parse(lex.tokenize_line());
+      BaseNode *next = &astNode;
+      std::string spaces = "";
+      while (next) {
+        std::cout << spaces << "[" << next->type << "]\n";
+        spaces += "  ";
+        next = next->next;
+      }
+      // execute(lex, env);
     }
   }
 

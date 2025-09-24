@@ -1,11 +1,5 @@
 #include "core/executer.h"
 
-const std::string builtins = "cd pwd exit";
-
-bool is_builtin(const std::string& cmd) {
-  if (builtins.find(cmd) == std::string::npos) return false;
-  return true;
-}
 
 std::vector<char*> make_argv(const std::string &filename,
                              const std::string &args) {
@@ -62,6 +56,29 @@ int run_builtin(const std::string &cmd, const std::string &argv, Env &env) {
     cmd_exit();
 
   return -1;
+}
+
+bool redirect_fd(const std::string &path, int target, bool append=false, bool input=false) {
+  int flags = O_WRONLY | O_CREAT;
+  flags |= append ? O_APPEND : O_TRUNC;
+
+  int fd;
+  if (!input)
+    fd = open(path, flags, 0644);
+  else
+    fd = open(path, O_RDONLY);
+  if (fd < 0) {
+    std::cerr << "Nova: couldn't open file: " << path << '\n';
+    return false;
+  }
+
+  if (dup2(fd, target) < 0) {
+    std::cerr << "Nova: couldn't duplicate fd: " << fd " -> " << target << '\n';
+    close(fd);
+    return false;
+  }
+  close(fd);
+  return true;
 }
 
 int run_pipeline(const std::vector<std::vector<std::string>> &commands, Env &env) {

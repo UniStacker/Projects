@@ -75,6 +75,14 @@ public:
     map[k] = v;
   }
 
+  void emplace_at(const Key &k, const Value &v, const size_t &pos) {
+    if (pos < 0 || pos >= order.size())
+      throw std::out_of_range("Invalid push idx");
+    if (contains(k)) erase(k);
+    order.insert(order.begin() + pos, k);
+    map.emplace(k, v);
+  }
+
   template<typename... Args>
   void emplace(const Key &k, Args&&... args) {
     if (!contains(k)) {

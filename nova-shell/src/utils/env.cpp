@@ -43,7 +43,7 @@ std::vector<char*> Env::to_envp() const {
     return envp;
 }
 
-std::string Env::getFromPath(const std::string &program) {
+std::string Env::getFromPath(const std::string &program) const {
   auto path_var = this->get("PATH");
   auto paths = utils::split_string(path_var, ":");
 

@@ -30,5 +30,5 @@ public:
   std::vector<char*> to_envp() const;
 
   // Get the absolute path of a program from the paths stored in $PATH
-  std::string getFromPath(const std::string& program);
+  std::string getFromPath(const std::string& program) const;
 };
