@@ -2,15 +2,13 @@
 
 
 std::vector<char*> make_argv(const std::string &filename,
-                             const std::string &args) {
+                             const vec_str &args) {
   std::vector<char*> argv;
   argv.reserve(args.size() + 2);
 
   argv.push_back(strdup(filename.c_str()));   // copy program name
 
-  std::istringstream iss(args);
-  std::string arg;
-  while (iss >> arg) {
+  for (auto& arg : args) {
     argv.push_back(strdup(arg.c_str()));  // copy each arg
   }
   argv.push_back(nullptr);
@@ -18,26 +16,26 @@ std::vector<char*> make_argv(const std::string &filename,
   return argv;
 }
 
-int cmd_cd(const fs::path &path, Env &env) {
-  fs::path rpath = path;
-  if (path.is_relative()) rpath = fs::current_path() / path;
+int cmd_cd(const vec_str &args, Env &env) {
+  fs::path rpath = args[0];
+  if (rpath.is_relative()) rpath = fs::current_path() / rpath;
 
-  if (path.empty()) return cmd_cd(env.get("HOME"), env);
-  else if (fs::exists(path) && fs::is_directory(path)) {
+  if (rpath.empty()) return cmd_cd({env.get("HOME")}, env);
+  else if (fs::exists(rpath) && fs::is_directory(rpath)) {
     if (env.get("OLDPWD") != env.get("PWD")) env.set("OLDPWD", env.get("PWD"));
-    chdir(path.string().c_str());
+    chdir(rpath.string().c_str());
     env.set("PWD", fs::current_path().string());
     return 0;
   } 
-  else if (fs::exists(path)) {
-    std::cerr << "cd: Path is not a dir '" << path.string() << "'\n";
+  else if (fs::exists(rpath)) {
+    std::cerr << "cd: Path is not a dir '" << rpath.string() << "'\n";
     return 1;
   }
-  else std::cerr << "cd: Path does not exist '" << path.string() << "'\n";
+  else std::cerr << "cd: Path does not exist '" << rpath.string() << "'\n";
   return 2;
 }
 
-int cmd_pwd(Env& env) {
+int cmd_pwd(const Env& env) {
   auto cwd = env.get("PWD") + '\n';
   write(STDOUT_FILENO, cwd.c_str(), cwd.length());
   return 0;
@@ -47,9 +45,9 @@ void cmd_exit() {
   exit(0);
 }
 
-int run_builtin(const std::string &cmd, const std::string &argv, Env &env) {
+int run_builtin(const std::string &cmd, const vec_str &args, Env &env) {
   if (cmd == "cd")
-    return cmd_cd(argv, env);
+    return cmd_cd(args, env);
   else if (cmd == "pwd")
     return cmd_pwd(env);
   else if (cmd == "exit")
@@ -58,52 +56,66 @@ int run_builtin(const std::string &cmd, const std::string &argv, Env &env) {
   return -1;
 }
 
-bool redirect_fd(const std::string &path, int target, bool append=false, bool input=false) {
-  int flags = O_WRONLY | O_CREAT;
-  flags |= append ? O_APPEND : O_TRUNC;
+bool redirect_fd(const int &src, const int &target) {
+  if (dup2(src, target) < 0) {
+    std::cerr << "Nova: couldn't duplicate fd: " << src << " -> " << target << '\n';
+    close(src);
+    return false;
+  }
+  close(src);
+  return true;
+}
+
+bool redirect_file(const std::string &path, int target, bool append=false, bool input=false) {
+  int flags = O_WRONLY | (append ? O_APPEND : O_CREAT | O_TRUNC);
 
   int fd;
   if (!input)
-    fd = open(path, flags, 0644);
+    fd = open(path.c_str(), flags, 0644);
   else
-    fd = open(path, O_RDONLY);
+    fd = open(path.c_str(), O_RDONLY);
   if (fd < 0) {
     std::cerr << "Nova: couldn't open file: " << path << '\n';
     return false;
   }
-
-  if (dup2(fd, target) < 0) {
-    std::cerr << "Nova: couldn't duplicate fd: " << fd " -> " << target << '\n';
-    close(fd);
-    return false;
-  }
-  close(fd);
-  return true;
+  
+  return redirect_fd(fd, target);
 }
 
-int run_pipeline(const std::vector<std::vector<std::string>> &commands, Env &env) {
-  if (commands.empty()) return -1;
 
-  size_t n = commands.size();
-  std::vector<int> pipes(2 * (n - 1));
+std::string getFullCommand(const std::string& command, const Env& env) {
+  fs::path path { command };
+  if (!fs::exists(path) && !is_builtin(path))
+    path = env.getFromPath(path);
 
-  for (size_t i = 0; i < n - 1; ++i)
-    if (pipe(&pipes[i * 2]) == -1) { perror("pipe"); return 127; }
+  if (!fs::exists(path) && !is_builtin(path)) {
+    std::cerr << "Nova: No command " << path << " Found, Did you mean:\n";
+    return {};
+  } return path;
+}
+
+int run_command(ExecNode &node, Env &env) {
+  bool isBasic = !node.pipe;
+  std::vector<int> pipes;
 
   std::vector<pid_t> pids {};
 
-  for (size_t i = 0; i < n; ++i) {
-    auto command = commands[i][0];
-    auto args = commands[i][1];
+  ExecNode cmdNode = std::move(node);
+  for (size_t i = 0; ; i++) {
+    auto command = getFullCommand(cmdNode.command, env);
+    auto args = cmdNode.args;
     auto name = fs::path(command).filename().string();
     bool builtin = is_builtin(command);
 
-    if (DEBUG)
-      std::clog << "Running: " << command << " " << args << '\n';
+    if (DEBUG) {
+      std::clog << "Running: " << command << " ";
+      for (const auto& arg : args) std::cout << arg << ' ';
+      std::cout << '\n';
+    }
 
 
     // Special case: single builtin (no pipes)
-    if (builtin && n == 1)
+    if (builtin && isBasic)
       return run_builtin(command, args, env);
 
     pid_t pid = fork();
@@ -111,20 +123,37 @@ int run_pipeline(const std::vector<std::vector<std::string>> &commands, Env &env
       // --- CHILD ---
 
       // Setup redirections
-      if (i > 0) dup2(pipes[(i - 1) * 2], STDIN_FILENO);
-      if (i < n - 1) dup2(pipes[i * 2 + 1], STDOUT_FILENO);
+      for (const auto& [src, target] : cmdNode.redirects) {
+             if (src == "write")  redirect_file(target, STDOUT_FILENO);
+        else if (src == "append") redirect_file(target, STDOUT_FILENO, true);
+        else if (src == "read")   redirect_file(target, STDIN_FILENO, false, true);
+        else redirect_fd(stoi(src), stoi(target));
+      }
+
+      if (cmdNode.pipe) {
+        pipes.push_back(0); pipes.push_back(0);
+        if (pipe(&pipes[i * 2]) == -1) {
+          std::cerr << "Nova: couldn't create a pipe" << '\n';
+          return 127;
+        }
+        if (i > 0) dup2(pipes[(i - 1) * 2], STDIN_FILENO);
+        if (cmdNode.pipe) dup2(pipes[i * 2 + 1], STDOUT_FILENO);
+      }
       for (int fd : pipes) close(fd);
 
       if (builtin)
         return run_builtin(command, args, env);
       else {
-        auto argv = make_argv(commands[i][0], commands[i][1]);
+        auto argv = make_argv(command, args);
         execve(argv[0], argv.data(), env.to_envp().data());
-        perror("execve");
+        std::cerr << "Nova: couldn't execv command: " << command << '\n';
         return 127;
       }
     }
     pids.push_back(pid);
+    if (cmdNode.pipe)
+      cmdNode = std::move(*static_cast<ExecNode*>(cmdNode.pipe.get()));
+    else break;
   }
 
   for (int fd : pipes) close(fd);
@@ -144,60 +173,20 @@ int run_pipeline(const std::vector<std::vector<std::string>> &commands, Env &env
   }
 }
 
-int run_command(const fs::path &command, 
-                const std::string &args, 
-                Env &env)
-{
-  std::string name = command.filename().string();
-  if (DEBUG)
-    std::clog << "Running: " << command << " " << args << '\n';
-
-  if (is_builtin(command)) return run_builtin(command, args, env);
-
-  pid_t pid = fork();
-  if (pid < 0) {
-    perror("fork failed");
-    return -1;
+// =======================
+//     Visitor Iterface
+// =======================
+struct Interpreter : Visitor {
+  Env& env;
+  
+  Interpreter(Env &env) : env(env)
+  {}
+  
+  // Node interpreters
+  void visit(ExecNode &node) override {
+    run_command(node, env);
   }
-
-  if (pid == 0) {
-    // Child: exec command //
-    execve(command.string().c_str(), make_argv(name, args).data(), env.to_envp().data());
-    perror("execve failed");
-    _exit(1);
-  }
-
-  // Parent: wait for child //
-  int status;
-  if (waitpid(pid, &status, 0) < 0) {
-    perror("waitpid failed");
-    return -1;
-  }
-
-  if (WIFEXITED(status)) {
-    return WEXITSTATUS(status);  // child exit code
-  } else {
-    return -1;
-  }
-}
-
-std::vector<vec_str> readyCommands(const omap_str& commands, Env& env) {
-  std::vector<vec_str> outCmds {};
-  outCmds.reserve(commands.size() + 1);
-
-  for (const auto &[cmd, args] : commands) {
-    fs::path path { cmd };
-    if (!fs::exists(path) && !is_builtin(path))
-      path = env.getFromPath(path);
-
-    if (!fs::exists(path) && !is_builtin(path) && cmd.substr(0, 15) != "nova_internal_") {
-      std::cerr << "No command " << path << " Found, Did you mean:\n";
-      return {};
-    } else outCmds.push_back({ path, args });
-  }
-
-  return outCmds;
-}
+};
 
 void execute(Lexer &lex, Env &env) {
   while (!lex.eof()) {
@@ -206,19 +195,9 @@ void execute(Lexer &lex, Env &env) {
     if (tokens.empty()) continue;
     if (DEBUG) for (auto& t : tokens) std::cout << t;
 
-    omap_str ast = parse(tokens, env);
-
-    auto type = ast["type"];
-    if (type == "command") {
-      auto commands { readyCommands(ast.slice(1, ast.size()), env) };
-      if (!commands.empty())
-        run_command(commands[0][0], commands[0][1], env);
-    }
-    else if (type == "pipe") {
-      auto commands = readyCommands(ast.slice(1, ast.size()), env);
-      if (!commands.empty())
-        run_pipeline(commands, env);
-    }
+    auto ast = parse(tokens, env);
+    Interpreter intp(env);
+    ast.traverse(intp);
   }
 }
 

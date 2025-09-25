@@ -3,7 +3,7 @@
 
 const std::string builtins = "cd pwd exit";
 
-bool is_builtin(const std::string& cmd) {
+bool is_builtin(const std::string &cmd) {
   if (builtins.find(cmd) == std::string::npos) return false;
   return true;
 }
@@ -22,11 +22,11 @@ bool valid_quotes(const vec_tok &tokens) {
   return true;
 }
 
-std::unique_pointer<ExecNode> getValidExecNode(
+bool addValidCmd(
   const std::string &cmd,
   const vec_str &args,
   const Env &env,
-
+  ExecNode *node
 ) {
   std::string path = utils::parse_path(cmd, env);
   if (!fs::exists(path) && !is_builtin(path))
@@ -34,18 +34,16 @@ std::unique_pointer<ExecNode> getValidExecNode(
 
   if (!fs::exists(path) && !is_builtin(path)) {
     std::cerr << "Nova: No command " << path << " Found, Did you mean:\n";
-    return nullptr;
+    return false;
   } else {
-    auto node = std::make_unique<ExecNode>();
-    node->cmd = std::move(path);
+    if (1) std::cout << "Adding command: " << path << '\n';
+    node->command = std::move(path);
     node->args = std::move(args);
-    return std::move(node);
+    return true;
   }
 }
 
 bool handleRedirects(
-  std::string &cmd,
-  vec_str &args,
   const std::string op,
   const vec_tok &tokens,
   size_t &i,
@@ -56,22 +54,15 @@ bool handleRedirects(
     std::cerr << "Nova: Unexpected end of tokens\n";
     return false;
   }
-  if ((auto cmdNode = addValidCmd(cmd, args, env))) {
-    node->cmd = cmdNode->cmd;
-    node->args = cmdNode->args;
-  } else return false;
 
   if (op == ">") {
-    node->redirects.emplace("nova_builtin_writeOut", utils::parse_path(tokens[i].value, env));
+    node->redirects.emplace("write", utils::parse_path(tokens[i].value, env));
   }
   else if (op == ">>") {
-    node->redirects.emplace("nova_builtin_appendOut", utils::parse_path(tokens[i].value, env));
+    node->redirects.emplace("append", utils::parse_path(tokens[i].value, env));
   }
   else if (op == "<") {
-    node->redirects.emplace("nova_builtin_readIn", utils::parse_path(tokens[i].value, env));
-  }
-  else if (op == "|") {
-    cmd = tokens[i].value;
+    node->redirects.emplace("read", utils::parse_path(tokens[i].value, env));
   }
   else return false;
 
@@ -79,22 +70,31 @@ bool handleRedirects(
   return true;
 }
 
-std::unique_pointer<ExecNode> parse_command(const vec_tok &tokens, const Env &env) {
+std::unique_ptr<ExecNode> parse_command(
+  const vec_tok &tokens,
+  size_t &idx,
+  const Env &env
+) {
   auto node = std::make_unique<ExecNode>();
   std::string cmd { tokens[0].value };
   vec_str args {};
 
-  // std::string redOps(" > >> < | ");
+  std::string redOps(" > >> < ");
 
-  for (size_t i=1; i<tokens.size(); i++) {
-    auto type = tokens[i].type;
-    auto value = tokens[i].value;
-    // auto isRed = redOps.find(' ' + value + ' ') != std::string::npos;
+  for (; idx<tokens.size(); idx++) {
+    auto type = tokens[idx].type;
+    auto value = tokens[idx].value;
+    auto isRed = redOps.find(' ' + value + ' ') != std::string::npos;
 
-    // if (type == TokenType::OPERATOR) {
-      // if (!handleRedirects(cmd, args, value, tokens, i, env, node.raw()))  return nullptr;
-    // } else
-    if (value[0] != '\'') {
+    if (type == TokenType::OPERATOR) {
+      if (!addValidCmd(cmd, args, env, node.get())) return nullptr;
+      if (isRed && !handleRedirects(value, tokens, idx, env, node.get())) return nullptr;
+      if (value == "|") {
+        std::unique_ptr<ExecNode> next;
+        if (!(next = parse_command(tokens, ++idx, env))) return nullptr;
+        node->pipe = std::move(next);
+      }
+    } else if (value[0] != '\'') {
       if (value[0] == '"') value = value.substr(1, value.length()-2);
       value = utils::parse_path(value, env);
     }
@@ -102,7 +102,8 @@ std::unique_pointer<ExecNode> parse_command(const vec_tok &tokens, const Env &en
     if (value[0] == '\'') value = value.substr(1, value.length()-2);
     args.push_back(value);
   }
-  if (!cmd.empty() && addValidCmd(cmd, args, env, next)) return nullptr;
+  // if (!cmd.empty() && addValidCmd(cmd, args, env, node.get())) return nullptr;
+  return node;
 }
 
 AST parse(const vec_tok &tokens, const Env &env) {
@@ -110,7 +111,8 @@ AST parse(const vec_tok &tokens, const Env &env) {
     return {};
   }
 
-  Ast ast;
+  AST ast;
+  size_t idx = 0;
   // TokenType type = { tokens[0].type };
   // std::string value { tokens[0].value };
   if (0) { // TODO: Keyword check
@@ -120,7 +122,9 @@ AST parse(const vec_tok &tokens, const Env &env) {
 
   }
   else{
-    ast.add_node(std::move(parse_command(tokens, env)));
+    std::unique_ptr<ExecNode> cmdNode;
+    if (!(cmdNode = parse_command(tokens, idx, env))) return {};
+    ast.append_node(std::move(cmdNode));
   }
 
   return ast;

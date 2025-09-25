@@ -11,4 +11,5 @@
 #include <unistd.h>
 
 
-Ast parse(const vec_tok &tokens, const Env &env);
+AST parse(const vec_tok &tokens, const Env &env);
+bool is_builtin(const std::string &cmd);

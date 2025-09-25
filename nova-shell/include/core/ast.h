@@ -1,7 +1,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <pair>
 #include "utils/types.h"
 
 
@@ -12,6 +11,13 @@ struct BaseNode {
   std::unique_ptr<BaseNode> next;
   virtual ~BaseNode() = default;
   virtual void accept(Visitor& v) = 0;
+  
+  // move-only
+  BaseNode() {};
+  BaseNode(BaseNode&&) noexcept = default;
+  BaseNode& operator=(BaseNode&&) noexcept = default;
+  BaseNode(const BaseNode&) = delete;
+  BaseNode& operator=(const BaseNode&) = delete;
 };
 
 // ========== Node Types ==========
@@ -23,6 +29,13 @@ struct ExecNode : BaseNode {
   omap_str redirects;
 
   void accept(Visitor& v) override;
+
+  // move-only
+  ExecNode() {}
+  ExecNode(ExecNode&&) noexcept = default;
+  ExecNode& operator=(ExecNode&&) noexcept = default;
+  ExecNode(const ExecNode&) = delete;
+  ExecNode& operator=(const ExecNode&) = delete;
 };
 
 
@@ -40,6 +53,14 @@ public:
   AST() = default;
   ~AST() = default;
 
+  // Allow moves
+  AST(AST&&) noexcept = default;
+  AST& operator=(AST&&) noexcept = default;
+
+  // Disallow copies
+  AST(const AST&) = delete;
+  AST& operator=(const AST&) = delete;
+
   // ========== Node adding methods ==========
   ExecNode* add_exec_node(std::string cmd, std::vector<std::string> args);
 
@@ -48,6 +69,9 @@ public:
 
   // Delete node (by pointer)
   bool delete_node(BaseNode* target);
+
+  // Getter for AST length
+  size_t size() { return length; }
 
   // Helper to append a node at the end
   BaseNode* append_node(std::unique_ptr<BaseNode> new_node);

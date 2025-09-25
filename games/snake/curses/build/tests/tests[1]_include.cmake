@@ -1,0 +1,5 @@
+if(EXISTS "/data/data/com.termux/files/home/.projects/games/snake/curses/build/tests/tests[1]_tests.cmake")
+  include("/data/data/com.termux/files/home/.projects/games/snake/curses/build/tests/tests[1]_tests.cmake")
+else()
+  add_test(tests_NOT_BUILT tests_NOT_BUILT)
+endif()
